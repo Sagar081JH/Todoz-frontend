@@ -1,0 +1,35 @@
+#headlineInputDark::placeholder {
+  color: white;
+  opacity: 0.5;
+}
+#descriptionInputDark::placeholder {
+  color: white;
+  opacity: 0.5;
+}
+
+#headlineInputLight::placeholder {
+  color: black;
+  opacity: 0.5;
+}
+#descriptionInputLight::placeholder {
+  color: black;
+  opacity: 0.5;
+}
+
+#headlineEditInputDark::placeholder {
+  color: white;
+  opacity: 0.5;
+}
+#descEditInputDark::placeholder {
+  color: white;
+  opacity: 0.5;
+}
+
+#headlineEditInputLight::placeholder {
+  color: black;
+  opacity: 0.3;
+}
+#descEditInputLight::placeholder {
+  color: black;
+  opacity: 0.3;
+}
