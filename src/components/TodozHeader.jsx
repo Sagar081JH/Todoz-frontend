@@ -4,7 +4,7 @@ export default function TodozHeader({ isToggleClicked, setIsToggleClicked }) {
   return (
     <>
       <div
-        className={`d-flex border p-1 rounded justify-content-between ${
+        className={`d-flex border p-1 rounded justify-content-between mb-4 ${
           isToggleClicked
             ? "text-warning bg-dark  border-secondary"
             : "text-success bg-light"
@@ -32,15 +32,6 @@ export default function TodozHeader({ isToggleClicked, setIsToggleClicked }) {
             )}
           </span>
         </div>
-      </div>
-
-      <div
-        id="myname"
-        className={`text-end mt-2 mb-2 pt-2 pb-2 ${
-          isToggleClicked ? "text-warning" : "text-primary"
-        }`}
-      >
-        <span className="border rounded p-2">Devloper : Sagar Ghumare</span>
       </div>
     </>
   );

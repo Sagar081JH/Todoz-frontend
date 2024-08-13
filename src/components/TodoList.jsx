@@ -14,16 +14,8 @@ export default function TodoList({
   return (
     <>
       <div>
-        {todos && todos.length > 0 && (
+        {todos && (
           <div>
-            <div
-              className={`col-6 fs-3 ${
-                isToggleClicked ? "text-light" : "text-dark"
-              }`}
-            >
-              Tasks
-            </div>
-            <hr />
             {todos.length > 0 ? (
               <table
                 className={`table ${
@@ -32,17 +24,9 @@ export default function TodoList({
               >
                 <thead>
                   <tr className="row">
-                    {/* <th
-                      scope="col"
-                      className={`${
-                        isToggleClicked ? "text-info" : "text-primary"
-                      }`}
-                    >
-                      #
-                    </th> */}
                     <th
                       scope="col"
-                      className={`col-4 ${
+                      className={`col-3 ${
                         isToggleClicked ? "text-info" : "text-primary"
                       }`}
                     >
@@ -50,13 +34,13 @@ export default function TodoList({
                     </th>
                     <th
                       scope="col"
-                      className={`col-4 text-start ${
+                      className={`col-5 text-start ${
                         isToggleClicked ? "text-info" : "text-primary"
                       }`}
                     >
                       Description
                     </th>
-                    <th scope="col" className={`col-4 text-start text-danger`}>
+                    <th scope="col" className={`col-4 text-center text-danger`}>
                       Edit/Delete
                     </th>
                   </tr>
@@ -64,6 +48,7 @@ export default function TodoList({
                 <tbody>
                   {todos.map((todo) => (
                     <Todo
+                      key={todo.todoId}
                       todo={todo}
                       isToggleClicked={isToggleClicked}
                       editTask={editTask}

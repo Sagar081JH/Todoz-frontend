@@ -14,11 +14,11 @@ export default function Todo({
     <>
       <tr className="row">
         {/* <td scope="row">{todo.todoId}</td> */}
-        <td className="col-4">{todo.headline}</td>
-        <td className="col-4">{todo.description}</td>
+        <td className="col-3">{todo.headline}</td>
+        <td className="col-5">{todo.description}</td>
 
-        <td className="col-4 p-2">
-          <span className="text-start">
+        <td className="col-4 text-center">
+          <span className="">
             {/* <Tooltip anchorSelect=".edit-desc" place="top">
                               Edit Description
                             </Tooltip> */}

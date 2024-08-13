@@ -6,10 +6,13 @@ import "bootstrap/dist/css/bootstrap.css";
 import TodozHeader from "./components/TodozHeader";
 import FormInput from "./components/FormInput";
 import TodoList from "./components/TodoList";
-import FetchTodoList from "./Api/FetchTodoList";
-import AddTask from "./Api/AddTask";
-import { DeleteTodo, DeleteLastTodo } from "./Api/DeleteTodo";
-import UpdateTodo from "./Api/UpdateTodo";
+import {
+  addTodo,
+  deleteTodo,
+  getTodos,
+  updateTodo,
+} from "./service/TodoService";
+import Footer from "./components/Footer";
 
 export default function App() {
   const [todoHeadline, setTodoHeadline] = useState("");
@@ -30,45 +33,90 @@ export default function App() {
 
   console.log("Todos :", todos);
 
+  const getAllTodos = () => {
+    return getTodos()
+      .then(function (response) {
+        setTodos(response.data);
+        if (response.status === 204) {
+        } else if (response.status === 500) {
+          throw new Error("Internal Server Error");
+        }
+      })
+      .catch(function (error) {
+        if (error.message === "Failed to fetch") {
+          setApiError(error.message + ": Server is down. please try later!");
+        } else {
+          setApiError(error.message);
+        }
+      });
+  };
+
   useEffect(() => {
-    FetchTodoList(setTodos, setApiError);
-  }, [todos]);
+    // FetchTodosAsync(setTodos, setApiError); //with async await (more readable code)
+    //FetchTodoList(setTodos, setApiError); // with fetch only
+    getAllTodos();
+  }, []);
 
   const [headlineBorder, setHeadlineBorder] = useState("");
   const [descInputBorderColor, setDescInputBorderColor] = useState("");
 
   function addTask(headline, description) {
-    AddTask(
-      headline,
-      description,
-      setDescInputBorderColor,
-      setDescriptionError,
-      setHeadlineBorder,
-      setHeadlineError,
-      FetchTodoList,
-      setTodos,
-      setApiError,
-      setActionMessage,
-      clearFields,
-      setMsgColor
-    );
+    if (headline === "" || description === "") {
+      if (description === "") {
+        setDescInputBorderColor("border-danger");
+        setDescriptionError("Empty description!");
+      } else {
+        setDescriptionError("");
+        setDescInputBorderColor("");
+      }
+      if (headline === "") {
+        setHeadlineBorder("border-danger");
+        setHeadlineError("Empty headline!");
+      } else {
+        setHeadlineBorder("");
+        setHeadlineError("");
+      }
+    } else {
+      setHeadlineBorder("");
+      setDescInputBorderColor("");
+      setDescriptionError("");
+      setHeadlineError("");
+      addTodo(headline, description)
+        .then((response) => {
+          if (response.status === 201) {
+            getAllTodos();
+            setApiError("");
+            setActionMessage("Task Added !!!");
+            setMsgColor("green");
+          }
+        })
+        .catch((err) => {
+          setApiError("Failed to add a task due to : " + err.message);
+          setActionMessage("");
+          console.log("error :" + err.message);
+        });
+
+      setTimeout(() => {
+        setActionMessage("");
+      }, 2000);
+      clearFields();
+    }
   }
 
   function deleteTask(todoId) {
-    if (todos.length <= 1) {
-      setTimeout(() => {
-        DeleteLastTodo(todoId, setTodos, setApiError);
-      }, 1000);
-    } else {
-      DeleteTodo(
-        todoId,
-        setTodos,
-        FetchTodoList,
-        setMsgColor,
-        setActionMessage,
-        setApiError
-      );
-    }
+    deleteTodo(todoId)
+      .then(function (response) {
+        if (response.status === 200) {
+          setTodos(todos.filter((todo) => todo.todoId !== todoId));
+          setMsgColor("red");
+          setActionMessage("Task Deleted !!!");
+        }
+      })
+      .catch((err) => {
+        setActionMessage("");
+        setApiError("Deletion failed due to : " + err.message);
+      });
+
     if (apiError === "") {
       setTimeout(() => {
         setActionMessage("");
@@ -105,17 +153,31 @@ export default function App() {
   }
 
   function updateTask(updatedHeadline, updatedDesc) {
-    UpdateTodo(
-      editedTodoId,
-      updatedHeadline,
-      updatedDesc,
-      setApiError,
-      setIsEditTaskClicked,
-      apiError,
-      setMsgColor,
-      setActionMessage,
-      clearFields
-    );
+    const editedTodo = {
+      todoId: editedTodoId,
+      headline: updatedHeadline,
+      description: updatedDesc,
+    };
+
+    updateTodo(editedTodo, editedTodo.todoId)
+      .then((response) => {
+        //setTodos([...todos, editedTodo]);
+        getAllTodos();
+      })
+      .catch((err) => {
+        setApiError("Task upadate failed due to : " + err.message);
+        console.log("taskUpdate : " + err);
+      });
+
+    if (apiError === "") {
+      setIsEditTaskClicked(false);
+      setMsgColor("blue");
+      setActionMessage("Task Updated !!!");
+      setTimeout(() => {
+        setActionMessage("");
+      }, 3000);
+      clearFields();
+    }
   }
 
   const [isToggleClicked, setIsToggleClicked] = useState(false);
@@ -133,48 +195,69 @@ export default function App() {
 
   return (
     <>
-      <div className="container p-2">
+      <div className="p-3">
         <TodozHeader
           isToggleClicked={isToggleClicked}
           setIsToggleClicked={setIsToggleClicked}
         />
 
-        <div>
-          <FormInput
-            isToggleClicked={isToggleClicked}
-            todoHeadline={todoHeadline}
-            setTodoHeadline={setTodoHeadline}
-            headlineError={headlineError}
-            headlineBorder={headlineBorder}
-            todoDescription={todoDescription}
-            setTodoDescription={setTodoDescription}
-            descInputBorderColor={descInputBorderColor}
-            descriptionError={descriptionError}
-            addTask={addTask}
-            updateTask={updateTask}
-            isEditTaskClicked={isEditTaskClicked}
-            clearFields={clearFields}
-          />
-
-          <div className="text-center fs-6 mt-3 pt-3 text-danger">
-            {apiError}
+        <div className="row">
+          <div className="col-sm-5">
+            <FormInput
+              isToggleClicked={isToggleClicked}
+              todoHeadline={todoHeadline}
+              setTodoHeadline={setTodoHeadline}
+              headlineError={headlineError}
+              headlineBorder={headlineBorder}
+              todoDescription={todoDescription}
+              setTodoDescription={setTodoDescription}
+              descInputBorderColor={descInputBorderColor}
+              descriptionError={descriptionError}
+              addTask={addTask}
+              updateTask={updateTask}
+              isEditTaskClicked={isEditTaskClicked}
+              clearFields={clearFields}
+            />
           </div>
 
-          <div className="text-center" style={{ color: msgColor }}>
-            {actionMessage}
-          </div>
+          <div className="col-sm-7">
+            {apiError !== "" && (
+              <div className="text-center fs-6 mt-3 pt-3 text-danger">
+                {apiError}
+              </div>
+            )}
 
-          <TodoList
-            todos={todos}
-            isToggleClicked={isToggleClicked}
-            editTask={editTask}
-            deleteTask={deleteTask}
-            isEditTaskClicked={isEditTaskClicked}
-            editedTodoId={editedTodoId}
-            setEditDeleteMsg={setEditDeleteMsg}
-            editDeleteMsg={editDeleteMsg}
-          />
+            <div className="row">
+              <div
+                className={`col-6 fs-4 ${
+                  isToggleClicked ? "text-light" : "text-dark"
+                }`}
+              >
+                Task List
+              </div>
+              <div className="text-start col-6" style={{ color: msgColor }}>
+                {actionMessage}
+              </div>
+            </div>
+            <hr />
+
+            {todos.length === 0 && (
+              <div className="text-center">No task available ! Pleas add.</div>
+            )}
+
+            <TodoList
+              todos={todos}
+              isToggleClicked={isToggleClicked}
+              editTask={editTask}
+              deleteTask={deleteTask}
+              isEditTaskClicked={isEditTaskClicked}
+              editedTodoId={editedTodoId}
+              setEditDeleteMsg={setEditDeleteMsg}
+              editDeleteMsg={editDeleteMsg}
+            />
+          </div>
         </div>
+        <Footer />
       </div>
     </>
   );

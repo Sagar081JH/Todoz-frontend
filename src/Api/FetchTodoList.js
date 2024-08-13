@@ -14,15 +14,13 @@ export default function FetchTodoList(setTodos, setApiError) {
         throw new Error("Internal Server Error");
       } else {
         console.log("http status : " + response.status);
-        throw new Error("Network response was not ok.");
+        throw new Error("Unknown network error");
       }
     })
     .then((data) => setTodos(data))
     .catch(function (error) {
       if (error.message === "Failed to fetch") {
-        setApiError(
-          error.message + ": Server might be down...please try later"
-        );
+        setApiError(error.message + ": Server is down. please try later!");
       } else {
         setApiError(error.message);
       }
@@ -31,4 +29,15 @@ export default function FetchTodoList(setTodos, setApiError) {
         error.message
       );
     });
+}
+
+export async function FetchTodosAsync(setTodos, setApiError) {
+  try {
+    const response = await fetch(`${Base_URL}/todos`);
+    const json = await response.json();
+    setTodos(json);
+  } catch (err) {
+    setApiError(err);
+    console.error(err);
+  }
 }
