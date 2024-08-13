@@ -46,7 +46,7 @@ export default function App() {
         if (error.message === "Failed to fetch") {
           setApiError(error.message + ": Server is down. please try later!");
         } else {
-          setApiError(error.message);
+          setApiError("Server is down. please try later!");
         }
       });
   };
@@ -221,28 +221,29 @@ export default function App() {
           </div>
 
           <div className="col-sm-7">
-            {apiError !== "" && (
+            {apiError !== "" ? (
               <div className="text-center fs-6 mt-3 pt-3 text-danger">
                 {apiError}
               </div>
-            )}
-
-            <div className="row">
-              <div
-                className={`col-6 fs-4 ${
-                  isToggleClicked ? "text-light" : "text-dark"
-                }`}
-              >
-                Task List
+            ) : (
+              <div className="row">
+                <div
+                  className={`col-6 fs-4 ${
+                    isToggleClicked ? "text-light" : "text-dark"
+                  }`}
+                >
+                  Task List
+                </div>
+                <div className="text-start col-6" style={{ color: msgColor }}>
+                  {actionMessage}
+                </div>
+                <hr />
+                {todos.length === 0 && (
+                  <div className="text-center">
+                    No task available ! Pleas add.
+                  </div>
+                )}
               </div>
-              <div className="text-start col-6" style={{ color: msgColor }}>
-                {actionMessage}
-              </div>
-            </div>
-            <hr />
-
-            {todos.length === 0 && (
-              <div className="text-center">No task available ! Pleas add.</div>
             )}
 
             <TodoList
